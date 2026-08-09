@@ -36,11 +36,26 @@ documented.
 
 ### MultiComp — [MultiComp/](MultiComp/)
 
-Working and usable. **No floating point**: `REAL` arithmetic compiles but fails
-at runtime with "Unimplemented Instruction", because our interpreter is one of
-the distribution's non-floating-point builds — a documented build option, not
-damage. One rough edge remains: text can disappear during an insert, though it
-is predictable and a refresh restores it.
+Working and usable. Boots, edits, compiles, runs and saves; inserts and deletes
+land correctly.
+
+**No floating point**: `REAL` arithmetic compiles but fails at runtime with
+"Unimplemented Instruction", because our interpreter is one of the
+distribution's non-floating-point builds — a documented build option, not
+damage.
+
+**One cosmetic artefact remains**: stepping the cursor horizontally gives
++1, +1, −1, +3 — the net movement correct, the intermediate positions not. It
+lives in MultiComp's terminal rather than in this code, and is present in the
+earliest working shim. Text also disappears during an insert; that happens on
+the Spectrum Next too, so it is the editor's own behaviour and nothing is lost.
+
+**[TERMINAL.md](MultiComp/TERMINAL.md) is the most useful thing here if you own
+this machine.** It records four measured faults in MultiComp's terminal — the
+`ESC[0K` that homes the cursor, the destructive backspace, the ignored
+parameterless forms, the unreliable relative moves — and gives the complete VT52
+command set that would replace them. Nearly all of this port's complexity exists
+to work around those four things.
 
 Most of the development went on a single bug. MultiComp's `ESC[0K` erases to end
 of line correctly — and then silently moves the cursor to home. Every editor
@@ -88,7 +103,7 @@ Both ports use the same structure.
 |---|---|---|
 | Primary | `PASBOOT_MULTICOMP_Z80_v16.ASM` (354) | `PASBOOT_NEXT_v9.ASM` (376) |
 | Secondary | `SECBOOT_MULTICOMP_v21.ASM` (517) | `SECBOOT_NEXT_v18.ASM` (540) |
-| Shim | `SHIM_MULTICOMP_v21.ASM` (972) | `SHIM_NEXT_v18.ASM` (453) |
+| Shim | `SHIM_MULTICOMP_v29.ASM` (973) | `SHIM_NEXT_v18.ASM` (453) |
 
 Size limits are tight and were hit repeatedly. On MultiComp the secondary stage
 and the shim have 1024 bytes each. On the Next the two together share 1024 bytes
@@ -184,27 +199,24 @@ machine.
 **The assembly sources, documentation and tools in this repository are free to
 use.**
 
-Nothing else here belongs to this project, and none of it is included. To build
-or run either port you will need the following from their original sources:
+The rest is other people's work, and is theirs:
 
-| What | Whose | Where |
-|---|---|---|
-| UCSD p-System IV.0, Adaptable Z80 distribution | SofTech Microsystems / UCSD | the usual retro archives |
-| MultiComp and its CP/M 2.2 CBIOS (`cbios128.asm`) | Grant Searle | searle.x10host.com |
-| ZX Spectrum Next CP/M BIOS, NextZXOS and their documentation | Garry Lancaster | ships with NextZXOS |
-| CP/M 3 manuals | Digital Research / Caldera | cpm.z80.de |
+| What | Whose |
+|---|---|
+| UCSD p-System IV.0, Adaptable Z80 distribution | SofTech Microsystems / UCSD |
+| MultiComp and its CP/M 2.2 CBIOS (`cbios128.asm`) | Grant Searle |
+| ZX Spectrum Next CP/M BIOS and NextZXOS | Garry Lancaster |
+| CP/M 3 and its manuals | Digital Research / Caldera |
 
-Two of these carry conditions worth stating plainly:
+One explicit condition worth stating plainly: **Grant Searle's CBIOS is
+non-commercial use only.**
 
-- **Grant Searle's CBIOS is explicitly non-commercial use only.**
-- The p-System distribution is SofTech's, and its status is unclear enough that
-  it is not redistributed here.
+## Ready-to-run images
 
-That last one is the awkward case, because neither port is usable without a
-p-System volume. The volume is a standard 512-byte-block p-System volume built
-from the Adaptable Z80 distribution disks; both `MultiComp/NOTES.md` and
-`Spectrum-Next/STATUS.md` describe how it is assembled and where it is written,
-so it can be rebuilt rather than copied.
+Working disk images are attached to the [releases](../../releases) — a bootable
+image for each machine, with the boot chain installed and a p-System volume in
+place. That is the quickest way to see either port running.
 
-**Disk images are deliberately absent** — they run to hundreds of megabytes and
-are reproducible from the offsets documented in each port's notes.
+The sources here are enough to rebuild them from scratch instead: both
+`MultiComp/NOTES.md` and `Spectrum-Next/STATUS.md` document the volume layout
+and the exact offsets each piece is written to.

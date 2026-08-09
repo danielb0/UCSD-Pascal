@@ -1,4 +1,33 @@
 ;==================================================================================
+; SBIOS SHIM v22 DIAGNOSTIC -- TRANSCRIBE THE CONSOLE STREAM, TRANSLATE NOTHING
+;
+; *** THIS BUILD DOES NOT DRIVE THE DISPLAY. IT IS A CAPTURE. ***
+;
+; The volume now carries the stock SYSTEM.PASCAL and the VT52 SYSTEM.MISCINFO,
+; so the sequences the p-System emits are no longer the ones v21 was written
+; against -- MISCINFO defines them, and MISCINFO changed. Cursor right now
+; steps forward one and back one, alternately.
+;
+; Rather than guess which sequence is responsible, this build prints every byte
+; the p-System sends to CONOUT, and translates nothing:
+;
+;       ~       ESC
+;       .       NUL (the p-System pads control codes with five of them)
+;       ^X      any other control character, as caret plus letter
+;       else    the character itself
+;
+; So ESC C arrives as  ~C , and the VT52 absolute form ESC Y row col arrives as
+; ~Y followed by two printable characters, because both are biased by 32 and
+; therefore land in the printable range. Reading which of those appears when
+; you press cursor-right answers the question outright.
+;
+; The screen will scroll and wrap, since nothing positions the cursor. That is
+; expected. The keyboard still works, so the editor can be driven normally.
+;
+; Everything below this point is v21 unchanged, and unreachable.
+;
+; -- original v21 header follows --
+;
 ; SBIOS SHIM v21 for MultiComp UCSD p-System -- runs at 0E200h, ABOVE TOPRAM
 ;
 ; *** THE FAULT, FOUND BY THE v30 PROBE ***
@@ -298,8 +327,33 @@ MYCOUT:
 		PUSH	DE
 		PUSH	HL
 		LD	C,A
+;
+;--- DIAGNOSTIC: transcribe and return; nothing below here runs -------------
+		LD	A,C
 		OR	A
-		JP	Z,VTDONE	;NUL padding: never reaches the screen
+		JR	NZ,DG1
+		LD	A,'.'		;NUL
+		CALL	RAWOUT
+		JP	VTDONE
+DG1:
+		CP	ESC
+		JR	NZ,DG2
+		LD	A,'~'		;ESC
+		CALL	RAWOUT
+		JP	VTDONE
+DG2:
+		CP	20h
+		JR	NC,DG3		;printable: as itself
+		PUSH	AF
+		LD	A,'^'		;other control: caret plus letter
+		CALL	RAWOUT
+		POP	AF
+		ADD	A,40h
+DG3:
+		CALL	RAWOUT
+		JP	VTDONE
+;
+;--- v21 from here down, unreachable in this build --------------------------
 		LD	A,(VTSTATE)
 		OR	A
 		JP	NZ,VTNOT0

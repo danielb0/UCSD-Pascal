@@ -1,0 +1,12 @@
+# assembler intermediates
+*.o
+*.lst
+*.sym
+
+# disk images -- rebuilt from documented offsets, never committed
+*.img
+*.p3d
+*.dsk
+*.vol
+*.VOL
+*.dat

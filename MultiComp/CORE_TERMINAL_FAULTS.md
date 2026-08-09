@@ -1,9 +1,12 @@
 # MultiComp's ANSI terminal: located faults and proposed fixes
 
 **Status: fixed and verified.** All fixes below were applied to
-`C:\Git\MultiComp\Components\TERMINAL\SBCTextDisplayRGB.vhd` and confirmed
-present by direct comparison against that file. The user reports the editor
-issues appear resolved on hardware, with further testing ongoing.
+`Components/TERMINAL/SBCTextDisplayRGB.vhd` in the MultiComp MiSTer core
+(a separate repository from this one —
+[MiSTer-devel/MultiComp_MiSTer](https://github.com/MiSTer-devel/MultiComp_MiSTer))
+and confirmed present by direct comparison against the file. The editor
+issues this port worked around appear resolved on hardware, with further
+testing ongoing.
 
 A source-level follow-up to [TERMINAL.md](TERMINAL.md), which recorded four
 faults measured on hardware. This document traces them to the VHDL and finds

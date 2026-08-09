@@ -44,18 +44,28 @@ land correctly.
 distribution's non-floating-point builds — a documented build option, not
 damage.
 
-**One cosmetic artefact remains**: stepping the cursor horizontally gives
-+1, +1, −1, +3 — the net movement correct, the intermediate positions not. It
-lives in MultiComp's terminal rather than in this code, and is present in the
-earliest working shim. Text also disappears during an insert; that happens on
-the Spectrum Next too, so it is the editor's own behaviour and nothing is lost.
+**The cursor artefact is fixed, in the FPGA core rather than in software.**
+[TERMINAL.md](MultiComp/TERMINAL.md) records four measured faults in
+MultiComp's terminal, found by probing on hardware. Tracing them into
+`SBCTextDisplayRGB.vhd` in the MultiComp MiSTer core
+([CORE_TERMINAL_FAULTS.md](MultiComp/CORE_TERMINAL_FAULTS.md)) found that two
+were small omissions — `ESC[0K` never told its erase routine where to restore
+the cursor to, and backspace was wired to erase as well as move — fixable in
+three lines total. A third, "parameterless forms are ignored", turned out to
+be a misreading of a screen already corrupted by the first bug rather than a
+real fault. All three fixes are applied and confirmed against the upstream
+[MiSTer-devel/MultiComp_MiSTer](https://github.com/MiSTer-devel/MultiComp_MiSTer)
+source. With those in place the reported +1, +1, −1, +3 cursor stepping has
+not recurred in testing so far, consistent with it having been a consequence
+of the erase bug rather than a separate defect. Text disappearing during an
+insert was traced to the editor's own behaviour, not the terminal — it
+happens identically on the Spectrum Next, so nothing is lost.
 
-**[TERMINAL.md](MultiComp/TERMINAL.md) is the most useful thing here if you own
-this machine.** It records four measured faults in MultiComp's terminal — the
-`ESC[0K` that homes the cursor, the destructive backspace, the ignored
-parameterless forms, the unreliable relative moves — and gives the complete VT52
-command set that would replace them. Nearly all of this port's complexity exists
-to work around those four things.
+The VT52 replacement `TERMINAL.md` describes is no longer the likely next
+step: three lines in the core did more than a new terminal implementation
+would have. It remains documented in case the fourth fault — unreliable
+relative cursor moves — turns out to be real once it can be measured on a
+corrected core.
 
 Most of the development went on a single bug. MultiComp's `ESC[0K` erases to end
 of line correctly — and then silently moves the cursor to home. Every editor
@@ -180,7 +190,8 @@ machine deterministic first and only then debug it.
 ## What is in this repository
 
 ```
-MultiComp/          the three production sources, NOTES.md, DIAGNOSTICS.md
+MultiComp/          the three production sources, NOTES.md, DIAGNOSTICS.md,
+                     TERMINAL.md, CORE_TERMINAL_FAULTS.md
 MultiComp/Diag/     diagnostic builds, each written to answer one question
 MultiComp/build/    assembled binaries, so no assembler is needed to install
 Spectrum-Next/      as above, plus STATUS.md

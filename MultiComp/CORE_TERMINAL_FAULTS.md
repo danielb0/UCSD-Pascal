@@ -4,9 +4,15 @@
 `Components/TERMINAL/SBCTextDisplayRGB.vhd` in the MultiComp MiSTer core
 (a separate repository from this one —
 [MiSTer-devel/MultiComp_MiSTer](https://github.com/MiSTer-devel/MultiComp_MiSTer))
-and confirmed present by direct comparison against the file. The editor
-issues this port worked around appear resolved on hardware, with further
-testing ongoing.
+and confirmed present by direct comparison against the file.
+
+**Confirmed by the p-System's own screen test program.** MultiComp did not
+pass it before these fixes; it passes now. The only remaining failures are
+keys not yet located on the physical keyboard — not terminal faults. This is
+a stronger check than the earlier hardware testing it supersedes: the screen
+test exercises the terminal systematically rather than through incidental use
+of the editor, so a pass here is direct evidence against fault 4 as well as
+faults 1 and 2, not just an absence of symptoms.
 
 A source-level follow-up to [TERMINAL.md](TERMINAL.md), which recorded four
 faults measured on hardware. This document traces them to the VHDL and finds
@@ -252,7 +258,7 @@ elsif paramCount=1 and dispByteLatch=x"43" then -- ESC[{param1}C - Cursor forwar
 `ESC[1C` from column 5 gives column 6. `ESC[1D` from column 5 gives column 4.
 Nothing here produces the observed `+1, +1, −1, +3` stepping.
 
-That leaves three candidates, none yet tested:
+That leaves three candidates — see the update below for which one it was:
 
 1. **The shim's own cursor tracking.** `SHIM_MULTICOMP_v29` maintains a shadow
    position solely to re-issue an absolute address after every erase — a
@@ -268,12 +274,11 @@ That leaves three candidates, none yet tested:
    to be an artefact of fault 1, fault 4 deserves re-measuring on a fixed core
    before it is treated as real.
 
-**Update:** with faults 1 and 2 fixed at source, the user reports the editor
-issues appear resolved on hardware — consistent with candidate 1 above: the
-wobble was most likely downstream of fault 1, produced by the shim's own
-workaround chasing a moving target, rather than a bug in the core's cursor
-handlers. Testing is ongoing; this document will be updated again if further
-use turns up a genuine residual case.
+**Update:** with faults 1 and 2 fixed at source, MultiComp now passes the
+p-System's screen test program, which it did not before. This confirms
+candidate 1 above: the wobble was downstream of fault 1, produced by the
+shim's own workaround chasing a moving target, rather than a bug in the
+core's cursor handlers. Fault 4 is resolved along with faults 1 and 2.
 
 ---
 
@@ -316,12 +321,16 @@ it. The independent reasons in [TERMINAL.md](TERMINAL.md) still stand:
 - VT52/H19/Z19 is among the best-supported terminal types in CP/M software, so
   the benefit extends well beyond UCSD
 
-The sensible order is now clear:
+The sensible order was:
 
-1. Confirm the built core matches this source.
-2. Apply the three lines.
-3. Re-measure. Specifically: does `+1 +1 −1 +3` survive, and can the shim shed
-   its cursor-tracking workaround?
+1. ~~Confirm the built core matches this source.~~ Done.
+2. ~~Apply the three lines.~~ Done.
+3. ~~Re-measure.~~ Done — the screen test program passes; `+1 +1 −1 +3` did
+   not survive.
 4. Decide on VT52 with that evidence in hand.
 
-Step 2 is an afternoon. Step 4 was always going to be a project.
+Step 2 was an afternoon, as expected. Step 4: with the terminal now passing
+the p-System's own verification program, there is no outstanding defect left
+to justify it. It remains worth doing eventually for the reasons above — the
+stock `SYSTEM.PASCAL`, the shim simplification, the benefit to other CP/M
+software — but as an improvement, not a fix.

@@ -55,15 +55,17 @@ three lines total. A third, "parameterless forms are ignored", turned out to
 be a misreading of a screen already corrupted by the first bug rather than a
 real fault. All three fixes are applied and confirmed against the upstream
 [MiSTer-devel/MultiComp_MiSTer](https://github.com/MiSTer-devel/MultiComp_MiSTer)
-source. With those in place the reported +1, +1, −1, +3 cursor stepping has
-not recurred in testing so far, consistent with it having been a consequence
-of the erase bug rather than a separate defect. Text disappearing during an
-insert was traced to the editor's own behaviour, not the terminal — it
-happens identically on the Spectrum Next, so nothing is lost.
+source. With those in place, MultiComp now passes the p-System's own screen
+test program — it did not before. The reported +1, +1, −1, +3 cursor stepping
+did not survive the fix, confirming it was a consequence of the erase bug
+rather than a separate defect. Text disappearing during an insert was traced
+to the editor's own behaviour, not the terminal — it happens identically on
+the Spectrum Next, so nothing is lost.
 
-The VT52 replacement `TERMINAL.md` describes is no longer the likely next
-step: three lines in the core did more than a new terminal implementation
-would have. It remains documented in case the fourth fault — unreliable
+The VT52 replacement `TERMINAL.md` describes is no longer needed: three lines
+in the core did more than a new terminal implementation would have, and the
+terminal now passes UCSD's own verification program. It remains documented in
+case the fourth fault — unreliable
 relative cursor moves — turns out to be real once it can be measured on a
 corrected core.
 

@@ -14,6 +14,17 @@ test exercises the terminal systematically rather than through incidental use
 of the editor, so a pass here is direct evidence against fault 4 as well as
 faults 1 and 2, not just an absence of symptoms.
 
+**Confirmed independently by unrelated CP/M software.** SuperCalc2 had a
+corrupted screen before these fixes and works correctly now, on the same
+core change, with no changes of its own. This matters beyond being a second
+data point: SuperCalc2 has nothing to do with UCSD Pascal or this port's shim,
+so its screen corruption cannot have been an artefact of anything specific to
+this project. It was hitting the same `ESC[K` bug through its own ordinary
+use of the terminal, which is direct evidence that fault 1 was a genuine bug
+in the core's ANSI implementation — affecting any software that used that
+sequence normally — and not something particular to how the p-System or its
+shim happened to drive the display.
+
 A source-level follow-up to [TERMINAL.md](TERMINAL.md), which recorded four
 faults measured on hardware. This document traces them to the VHDL and finds
 that **two of the four are small omissions with one- and two-line fixes**, one
